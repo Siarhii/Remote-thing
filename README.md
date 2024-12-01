@@ -1,13 +1,13 @@
 # Remote Shutdown App
 
-A remote shutdown and monitoring application that allows users to schedule shutdown, sleep, and restart commands on their devices. The app features both online and offline modes, with the offline tab fully functional and the online tab under development.
+A remote shutdown and monitoring application that allows users to schedule shutdown, sleep, and restart commands for thier homelabs. The app features both online and offline modes, with the offline tab fully functional and the online tab under development.
 
 ## Features
 
 ### Offline Tab (Working)
 
 - **Schedule Shutdown, Sleep, and Restart**: Users can schedule their device to shut down, go to sleep, or restart after a timer, with a maximum limit of **1 month**.
-- **Task Scheduling**: Users can also add tasks like shutting down the device after a game or software download completes.
+- **Task Scheduling (to be added)**: Users can also add tasks like shutting down the device after a game or software download completes.
 
 ### Online Tab (Under Development)
 
@@ -17,8 +17,8 @@ A remote shutdown and monitoring application that allows users to schedule shutd
 
 ### Security (Future Implementation)
 
-- **Secure Login**: Plans to add secure user authentication to prevent unauthorized access to user accounts and devices.
-- **Encrypted Communication**: All communications between the client app and the server will be secured.
+-somehow make this more secure
+-add more monitoring stats like cpu,ram usage etc
 
 ### Background Mode (In Progress)
 
@@ -38,7 +38,7 @@ OR
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/your-username/remote-shutdown-app.git
+   git clone https://github.com/Siarhii/Remote-thing.git
    ```
 
 2. **Navigate into the project folder**:
