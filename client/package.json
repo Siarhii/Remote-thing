@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@shadcn/ui": "^0.0.4",
+    "react-router-dom": "^7.0.1"
+  }
+}

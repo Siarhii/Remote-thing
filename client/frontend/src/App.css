@@ -1,0 +1,109 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  background-color: #2c2f33;
+}
+
+.sidebar {
+  width: 80px;
+  background-color: #23272a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.nav-button-link {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  text-decoration: none;
+}
+
+.nav-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background-color: #36393f;
+  color: #99aab5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: #40444b;
+}
+
+.nav-button.active {
+  background-color: #43b581;
+  color: white;
+}
+
+.shutdown-container {
+  position: relative;
+  margin-top: auto;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shutdown-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background-color: #808080;
+  color: white;
+  cursor: pointer;
+}
+
+.power-options {
+  position: absolute;
+  bottom: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.power-option {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.power-option:hover {
+  transform: scale(1.1);
+}
+
+.power-option.shutdown {
+  background-color: #e74c3c;
+}
+
+.power-option.restart {
+  background-color: #3498db;
+}
+
+.power-option.sleep {
+  background-color: #2ecc71;
+}
+
+.power-icon {
+  color: white;
+  font-size: 20px;
+}
+
+.content-area {
+  flex-grow: 1;
+  background-color: #2c2f33;
+  overflow: hidden;
+}
