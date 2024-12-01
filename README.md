@@ -17,8 +17,8 @@ A remote shutdown and monitoring application that allows users to schedule shutd
 
 ### Security (Future Implementation)
 
--somehow make this more secure
--add more monitoring stats like cpu,ram usage etc
+- somehow make this more secure
+- add more monitoring stats like cpu,ram usage etc
 
 ### Background Mode (In Progress)
 
@@ -44,15 +44,15 @@ OR
 2. **Navigate into the project folder**:
 
    ```bash
-   cd remote-shutdown-app
+   cd Remote-thing/client
    ```
 
 3. **Install dependencies**:
 
-   If you have Go installed, simply run:
+   If you have Go and wails installed, simply run:
 
    ```bash
-   go build
+   wails build
    ```
 
 4. **Run the application**:
@@ -60,7 +60,7 @@ OR
    After building the app, run it with:
 
    ```bash
-   ./remote-shutdown-app
+   ./Remote-shutdown.exe
    ```
 
 ## Usage
