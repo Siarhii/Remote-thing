@@ -17,10 +17,16 @@ const Offline = () => {
       return;
     }
 
+    if (timer > 44000) {
+      setMessage("You cannot set timer greater than a month (44000 minutes)");
+      setMessageType("error");
+      return;
+    }
+
     setMessage(
-      `${
+      `Your device will ${
         action.charAt(0).toUpperCase() + action.slice(1)
-      } scheduled for ${timer} minutes`
+      } in ${timer} minutes`
     );
     setMessageType("success");
 

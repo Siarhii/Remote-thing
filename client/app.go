@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -25,10 +26,11 @@ func (a *App) startup(ctx context.Context) {
 }
 
 
-func Shutdown(timer uint) error {
+func Shutdown(timer uint64) error {
 	switch runtime.GOOS {
 	case "windows", "linux", "darwin":
 		duration := time.Duration(timer) * time.Minute
+
 		time.Sleep(duration) 
 		
 		switch runtime.GOOS {
@@ -44,7 +46,7 @@ func Shutdown(timer uint) error {
 	}
 }
 
-func Sleep(timer uint) error {
+func Sleep(timer uint64) error {
 	
 	switch runtime.GOOS {
 	case "windows", "linux", "darwin":
@@ -64,7 +66,7 @@ func Sleep(timer uint) error {
 	}
 }
 
-func Restart(timer uint) error {
+func Restart(timer uint64) error {
 	switch runtime.GOOS {
 	case "windows", "linux", "darwin":
 		duration := time.Duration(timer) * time.Minute
@@ -84,34 +86,21 @@ func Restart(timer uint) error {
 }
 
 
-// func (a *App) ControlFromClient(action string) error {
-// 	var err error
-// 	switch action {
-// 	case "shutdown":
-// 		err = Shutdown()
-// 	case "sleep":
-// 		err = Sleep()
-// 	case "restart":
-// 		err = Restart()
-// 	default:
-// 		return fmt.Errorf("unsupported action: %s", action)
-// 	}
-
-// 	if err != nil {
-// 		return fmt.Errorf("%s failed: %v, unsupported operating system: %s", action, err, runtime.GOOS)
-// 	}
-// 	return nil
-// }
-
-func (a *App) ActionFromClient(action string,timer uint) error {
+func (a *App) ActionFromClient(action string,timer string) error {
 	var err error
+	num, err := strconv.ParseUint(timer, 10, 16)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return err
+	}
+	fmt.Printf("Num : %v",num)
 	switch action {
 	case "shutdown":
-		err = Shutdown(timer)
+		err = Shutdown(num)
 	case "sleep":
-		err = Sleep(timer)
+		err = Sleep(num)
 	case "restart":
-		err = Restart(timer)
+		err = Restart(num)
 	default:
 		return fmt.Errorf("unsupported action: %s", action)
 	}
