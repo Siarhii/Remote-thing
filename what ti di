@@ -1,0 +1,2 @@
+so user will be able to generate a code on frontend which will be based on his username,he will then copy this code and paste into his client
+client will make connection with backend and save the code after successful socket connection with backend

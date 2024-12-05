@@ -4,28 +4,32 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/websocket"
+	"server/handlers"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true 
-	},
-}
+// var upgrader = config.Upgrader
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	
-	fmt.Fprintf(w, "Hello, World!")
-}
+// var devicesStatus = make(map[string]string) // {"deviceCode" : "online/offline"}
+// var userDevices = make(map[string][]string) // {"user" : [deviceCode1,deviceCode2]}
+// var deviceSocketConnectionMap = make(map[string]*websocket.Conn)
+
+// func sendCommandHandler(w http.ResponseWriter, r *http.Request){
+// 	go sockets.sendCommand(deviceCode string,userID string,command string,timer uint64){}
+// }
 
 func main() {
-	// Handle requests at the root URL ("/")
-	http.HandleFunc("/", handler)
 
-	// Start the server on port 8080
+	http.HandleFunc("/connect", handlers.ConnectRouteHandler)
+	// http.HandleFunc("/api/sendCommand",sendCommandHandler())
+	http.HandleFunc("/api/allotdeviceID",handlers.GetDeviceIDHandler)
+
+	http.HandleFunc("/api/sendcommand",handlers.SendCommandHandlerr)
+
+	//starting server
 	fmt.Println("Server is listening on port 8080...")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil) 
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 	}
 }
+
