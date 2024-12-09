@@ -18,4 +18,7 @@ var LiveWebSocketConnectionsMap = make(map[string] *types.WebSocketConnection)
 // }
 
 var UserToDeviceIDMap = make(map[string]string)
-//for now key:value is  userName:DeviceID he generated //maybe i dont need it now
+//for now key:value is  userName:connectionCode he generated //maybe i dont need it now
+
+var AddedDeviceMap = make(map[string] *types.DeviceDetail)
+//key:value is connectionCode:deviceDetails

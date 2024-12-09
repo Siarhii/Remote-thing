@@ -12,7 +12,7 @@ import (
 )
 
 func ConnectRouteHandler(w http.ResponseWriter, r *http.Request) {
-
+fmt.Print("AJHHHA")
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method. Only GET is allowed.", http.StatusMethodNotAllowed)
 		return
