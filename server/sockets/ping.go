@@ -1,7 +1,6 @@
 package sockets
 
 import (
-	"fmt"
 	"time"
 
 	"server/types"
@@ -12,7 +11,6 @@ func StartPingMessages(wsc *types.WebSocketConnection){
 		Event : "Ping",
 		Content: "i can add date/time here",
 	}
-	fmt.Print("Sending ping")
 	for {
 		wsc.WriteChan <- pingMessage
 

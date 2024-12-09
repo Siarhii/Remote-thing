@@ -1,32 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { Timer, Lock } from "lucide-react";
+const backendURL = import.meta.env.VITE_BACKEND_URL;
 
-const performDeviceAction = async (
+const performDeviceCommand = async (
   deviceId,
-  action,
+  Command,
   password,
   scheduleTime = null
 ) => {
   try {
-    //do actiosnss
-    const response = await fetch("/api/device-action", {
+    const response = await fetch(`${backendURL}/api/sendcommand`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         deviceId,
-        action,
+        Command,
         password,
         scheduleTime,
       }),
     });
 
+    if (!response.ok) {
+      const errorResponse = await response.text();
+      const errorMessage = errorResponse || "Unknown error occurred";
+      throw new Error(errorMessage);
+    }
+
     const result = await response.json();
     return result;
   } catch (error) {
     console.error("API call failed:", error);
-    throw error;
+    throw error; // Re-throw the error to be caught by the calling function
   }
 };
 
@@ -35,38 +41,24 @@ const DevicesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  //get initial fetch
-  useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const mockDevices = [
-          {
-            id: "1",
-            name: "Home Desktop",
-            status: "online",
-            onlineSince: "2 mins ago",
-            scheduledAction: null,
-          },
-          {
-            id: "2",
-            name: "Work Laptop",
-            status: "online",
-            onlineSince: "30 mins ago",
-            scheduledAction: {
-              type: "shutdown",
-              remainingTime: "01:45:30",
-            },
-          },
-        ];
+  const fetchDevices = async () => {
+    try {
+      const response = await fetch(`${backendURL}/api/devices`);
 
-        setDevices(mockDevices);
-        setIsLoading(false);
-      } catch (err) {
-        setError("Failed to fetch devices");
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error("Failed to fetch devices");
       }
-    };
 
+      const data = await response.json();
+      setDevices(data);
+      setIsLoading(false);
+    } catch (err) {
+      setError("Failed to fetch devices");
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDevices();
   }, []);
 
@@ -97,70 +89,90 @@ const DevicesPage = () => {
 
 const DeviceCard = ({ device, onDeviceUpdate }) => {
   const [passwordModal, setPasswordModal] = useState(false);
-  const [selectedAction, setSelectedAction] = useState(null);
+  const [selectedCommand, setSelectedCommand] = useState(null);
   const [scheduleTime, setScheduleTime] = useState("00:00");
   const [password, setPassword] = useState("");
-  const [actionError, setActionError] = useState(null);
+  const [CommandError, setCommandError] = useState(null);
 
-  const handleDeviceAction = async () => {
+  const handleDeviceCommand = async () => {
     try {
-      setActionError(null);
-      const result = await performDeviceAction(
+      setCommandError(null);
+
+      // Convert scheduleTime (hh:mm) to total minutes
+      const convertToMinutes = (time) => {
+        if (time === "00:00") return 0; // No scheduling
+        const [hours, minutes] = time.split(":").map(Number); // Split and convert to numbers
+        return `${hours * 60 + minutes}`;
+      };
+
+      const scheduleTimeInMinutes = convertToMinutes(scheduleTime);
+
+      const result = await performDeviceCommand(
         device.id,
-        selectedAction,
+        selectedCommand,
         password,
-        scheduleTime !== "00:00" ? scheduleTime : null
+        scheduleTimeInMinutes
       );
 
       if (result.success) {
         const updatedDevice = {
           ...device,
-          scheduledAction:
+          scheduledCommand:
             scheduleTime !== "00:00"
               ? {
-                  type: selectedAction,
-                  remainingTime: scheduleTime,
+                  type: selectedCommand,
+                  remainingTime: `${Math.floor(scheduleTimeInMinutes / 60)
+                    .toString()
+                    .padStart(2, "0")}:${(scheduleTimeInMinutes % 60)
+                    .toString()
+                    .padStart(2, "0")}`,
                 }
               : null,
         };
 
         onDeviceUpdate(updatedDevice);
         setPasswordModal(false);
-        alert(result.message || `${selectedAction} successful`);
+        alert(result.message || `${selectedCommand} successful`);
       } else {
-        setActionError(result.message || "Action failed");
+        setCommandError(result.message || "Command failed");
       }
     } catch (error) {
-      setActionError("Failed to perform action");
+      console.error("Error details:", error);
+
+      if (error.message === "Device is offline") {
+        setCommandError("Device is offline");
+      } else {
+        setCommandError(error.message || "Failed to perform Command");
+      }
     }
   };
 
-  const openPasswordModal = (action) => {
-    setSelectedAction(action);
+  const openPasswordModal = (Command) => {
+    setSelectedCommand(Command);
     setPasswordModal(true);
     setScheduleTime("00:00");
     setPassword("");
-    setActionError(null);
+    setCommandError(null);
   };
 
-  const cancelScheduledAction = async () => {
+  const cancelScheduledCommand = async () => {
     try {
-      const result = await performDeviceAction(device.id, "cancel", password);
+      const result = await performDeviceCommand(device.id, "cancel", password);
 
       if (result.success) {
         const updatedDevice = {
           ...device,
-          scheduledAction: null,
+          scheduledCommand: null,
         };
 
         onDeviceUpdate(updatedDevice);
         setPasswordModal(false);
-        alert("Scheduled action cancelled");
+        alert("Scheduled Command cancelled");
       } else {
-        setActionError(result.message || "Failed to cancel action");
+        setCommandError(result.message || "Failed to cancel Command");
       }
     } catch (error) {
-      setActionError("Failed to cancel action");
+      setCommandError("Failed to cancel Command");
     }
   };
 
@@ -169,13 +181,13 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
       <div>
         <div className="flex items-center space-x-2">
           <h2 className="font-semibold">{device.name}</h2>
-          {device.scheduledAction && (
+          {device.scheduledCommand && (
             <div
               className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs flex items-center space-x-1"
-              title={`Scheduled ${device.scheduledAction.type}`}
+              title={`Scheduled ${device.scheduledCommand.type}`}
             >
               <Timer size={12} />
-              <span>{device.scheduledAction.remainingTime}</span>
+              <span>{device.scheduledCommand.remainingTime}</span>
             </div>
           )}
         </div>
@@ -189,31 +201,31 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
         </p>
       </div>
 
-      {/* Device Actions */}
+      {/* Device Commands */}
       <div className="flex space-x-2">
-        {device.scheduledAction ? (
+        {device.scheduledCommand ? (
           <button
             onClick={() => openPasswordModal("cancel")}
             className="bg-red-500 hover:bg-red-600 text-white p-2 rounded"
           >
-            Cancel Scheduled Action
+            Cancel Scheduled Command
           </button>
         ) : (
           <>
             <button
-              onClick={() => openPasswordModal("shutdown")}
+              onClick={() => openPasswordModal("Shutdown")}
               className="bg-[#2E3440] hover:bg-[#3B4252] text-white border border-[#4C566A] py-2 px-4 rounded-md transition"
             >
               Shutdown
             </button>
             <button
-              onClick={() => openPasswordModal("restart")}
+              onClick={() => openPasswordModal("Restart")}
               className="bg-[#2E3440] hover:bg-[#3B4252] text-white border border-[#4C566A] py-2 px-4 rounded-md transition"
             >
               Restart
             </button>
             <button
-              onClick={() => openPasswordModal("sleep")}
+              onClick={() => openPasswordModal("Sleep")}
               className="bg-[#2E3440] hover:bg-[#3B4252] text-white border border-[#4C566A] py-2 px-4 rounded-md transition"
             >
               Sleep
@@ -227,9 +239,9 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4 capitalize">
-              {selectedAction === "cancel"
-                ? "Cancel Scheduled Action"
-                : `${selectedAction}`}
+              {selectedCommand === "cancel"
+                ? "Cancel Scheduled Command"
+                : `${selectedCommand}`}
             </h2>
 
             {/* Time input */}
@@ -259,25 +271,25 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
             </div>
 
             {/* Error Message */}
-            {actionError && (
-              <div className="text-red-500 mb-4">{actionError}</div>
+            {CommandError && (
+              <div className="text-red-500 mb-4">{CommandError}</div>
             )}
 
             <div className="flex space-x-2">
               <button
                 onClick={() =>
-                  selectedAction === "cancel"
-                    ? cancelScheduledAction()
-                    : handleDeviceAction()
+                  selectedCommand === "cancel"
+                    ? cancelScheduledCommand()
+                    : handleDeviceCommand()
                 }
                 className="flex-1 bg-green-600 hover:bg-green-700 p-2 rounded"
               >
-                {selectedAction === "cancel" ? "Cancel Action" : "Confirm"}
+                {selectedCommand === "cancel" ? "Cancel Command" : "Confirm"}
               </button>
               <button
                 onClick={() => {
                   setPasswordModal(false);
-                  setActionError(null);
+                  setCommandError(null);
                 }}
                 className="flex-1 bg-gray-700 hover:bg-gray-600 p-2 rounded"
               >

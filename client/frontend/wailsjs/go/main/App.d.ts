@@ -3,4 +3,4 @@
 
 export function ActionFromClient(arg1:string,arg2:string):Promise<void>;
 
-export function ConnectToServer(arg1:string,arg2:any):Promise<void>;
+export function ConnectToServer(arg1:string):Promise<string>;

@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"os/exec"
-	"os/signal"
 	"runtime"
 	"strconv"
 	"strings"
@@ -34,7 +32,6 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Shutdown system after specified timer
 func Shutdown(timer uint64) error {
 	switch runtime.GOOS {
 	case "windows", "linux", "darwin":
@@ -54,7 +51,6 @@ func Shutdown(timer uint64) error {
 	}
 }
 
-// Sleep system after specified timer
 func Sleep(timer uint64) error {
 	switch runtime.GOOS {
 	case "windows", "linux", "darwin":
@@ -74,7 +70,6 @@ func Sleep(timer uint64) error {
 	}
 }
 
-// Restart system after specified timer
 func Restart(timer uint64) error {
 	switch runtime.GOOS {
 	case "windows", "linux", "darwin":
@@ -94,13 +89,11 @@ func Restart(timer uint64) error {
 	}
 }
 
-// Message struct to match server-side definition
 type Message struct {
 	Event   string `json:"event"`
 	Content string `json:"content"`
 }
 
-// WebSocket connection details
 type ClientConnection struct {
 	conn     *websocket.Conn
 	deviceID string
@@ -110,14 +103,12 @@ type ClientConnection struct {
 	app      *App
 }
 
-// sendMessage is a thread-safe method to send messages
 func (c *ClientConnection) sendMessage(msg Message) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.conn.WriteJSON(msg)
 }
 
-// processSystemAction handles system actions based on received commands
 func (c *ClientConnection) processSystemAction(action string, timer string) error {
 	num, err := strconv.ParseUint(timer, 10, 16)
 	if err != nil {
@@ -127,7 +118,7 @@ func (c *ClientConnection) processSystemAction(action string, timer string) erro
 
 	var responseContent string
 	switch action {
-	case "shutdown":
+	case "Shutdown":
 		go func() {
 			err = Shutdown(num)
 			if err != nil {
@@ -137,7 +128,7 @@ func (c *ClientConnection) processSystemAction(action string, timer string) erro
 				responseContent = "System shutdown initiated"
 			}
 		}()
-	case "sleep":
+	case "Sleep":
 		go func() {
 			err = Sleep(num)
 			if err != nil {
@@ -147,7 +138,7 @@ func (c *ClientConnection) processSystemAction(action string, timer string) erro
 				responseContent = "System sleep initiated"
 			}
 		}()
-	case "restart":
+	case "Restart":
 		go func() {
 			err = Restart(num)
 			if err != nil {
@@ -161,7 +152,6 @@ func (c *ClientConnection) processSystemAction(action string, timer string) erro
 		return fmt.Errorf("unsupported action: %s", action)
 	}
 
-	// Send response back to the server
 	responseMsg := Message{
 		Event:   "SystemActionResponse",
 		Content: responseContent,
@@ -192,7 +182,6 @@ func (c *ClientConnection) messageRouter() {
 
 			switch msg.Event {
 			case "Ping":
-				// Immediate pong response
 				pongMsg := Message{
 					Event:   "Pong",
 					Content: "testing",
@@ -268,108 +257,46 @@ func (a *App) ActionFromClient(action string,timer string) error {
 	return nil
 }
 
-// ConnectToServer function establishes the WebSocket connection
-func (app *App) ConnectToServer(deviceID string, result func(string)) {
-	// Server WebSocket endpoint
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connect"}
+func (app *App) ConnectToServer(deviceID string) string {
+    // Create a channel to capture the result
+    resultChan := make(chan string, 1)
 
-	// Add query parameters for deviceID and userID
-	query := u.Query()
-	query.Set("deviceID", deviceID)
-	query.Set("userID", "user1")
-	u.RawQuery = query.Encode()
+    go func() {
+        u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connect"}
 
-	log.Printf("Connecting to %s", u.String())
+        query := u.Query()
+        query.Set("deviceID", deviceID)
+        query.Set("userID", "user1")
+        u.RawQuery = query.Encode()
 
-	// Create WebSocket connection
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		// Send error message back to the frontend if connection fails
-		result(fmt.Sprintf("Error connecting to WebSocket: %v", err))
-		return
-	}
-	defer c.Close()
+        log.Printf("Connecting to %s", u.String())
 
-	// Send success message back to frontend
-	result(fmt.Sprintf("Successfully connected to WebSocket with deviceID: %s", deviceID))
+        c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+        if err != nil {
+            resultChan <- fmt.Sprintf("Error connecting to WebSocket: %v", err)
+            return
+        }
+        defer c.Close()
 
-	// Create client connection struct
-	clientConn := &ClientConnection{
-		conn:     c,
-		deviceID: deviceID,
-		userID:   "user1",
-		done:     make(chan struct{}),
-		app:      app,
-	}
+        // Create client connection struct
+        clientConn := &ClientConnection{
+            conn:     c,
+            deviceID: deviceID,
+            userID:   "user1",
+            done:     make(chan struct{}),
+            app:      app,
+        }
 
-	// Channel to handle interrupt signal
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
+        // Send success message 
+        resultChan <- fmt.Sprintf("Successfully connected to WebSocket with deviceID: %s", deviceID)
 
-	// Single goroutine to handle all incoming messages
-	go clientConn.messageRouter()
+        // Handle incoming messages
+        go clientConn.messageRouter()
 
-	// Wait for interrupt signal
-	<-interrupt
+        // Wait for connection to be closed
+        <-clientConn.done
+    }()
 
-	// Cleanly close the connection
-	log.Println("Interrupt received, closing connection")
-	close(clientConn.done)
-	err = c.WriteMessage(websocket.CloseMessage,
-		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-	if err != nil {
-		log.Println("write close error:", err)
-	}
+    // Wait and return the result
+    return <-resultChan
 }
-
-
-// func main() {
-// 	// Create App instance
-// 	app := NewApp()
-
-// 	// Server WebSocket endpoint
-// 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connect"}
-
-// 	// Add query parameters for deviceID and userID
-// 	query := u.Query()
-// 	query.Set("deviceID", "cli1")
-// 	query.Set("userID", "user1")
-// 	u.RawQuery = query.Encode()
-
-// 	log.Printf("Connecting to %s", u.String())
-
-// 	// Create WebSocket connection
-// 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-// 	if err != nil {
-// 		log.Fatal("dial:", err)
-// 	}
-// 	defer c.Close()
-
-// 	// Create client connection struct
-// 	clientConn := &ClientConnection{
-// 		conn:     c,
-// 		deviceID: "cli1",
-// 		userID:   "user1",
-// 		done:     make(chan struct{}),
-// 		app:      app,
-// 	}
-
-// 	// Channel to handle interrupt signal
-// 	interrupt := make(chan os.Signal, 1)
-// 	signal.Notify(interrupt, os.Interrupt)
-
-// 	// Single goroutine to handle all incoming messages
-// 	go clientConn.messageRouter()
-
-// 	// Wait for interrupt signal
-// 	<-interrupt
-
-// 	// Cleanly close the connection
-// 	log.Println("Interrupt received, closing connection")
-// 	close(clientConn.done)
-// 	err = c.WriteMessage(websocket.CloseMessage, 
-// 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-// 	if err != nil {
-// 		log.Println("write close error:", err)
-// 	}
-// }

@@ -6,6 +6,6 @@ export function ActionFromClient(arg1, arg2) {
   return window['go']['main']['App']['ActionFromClient'](arg1, arg2);
 }
 
-export function ConnectToServer(arg1, arg2) {
-  return window['go']['main']['App']['ConnectToServer'](arg1, arg2);
+export function ConnectToServer(arg1) {
+  return window['go']['main']['App']['ConnectToServer'](arg1);
 }

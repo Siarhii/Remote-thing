@@ -1,8 +1,13 @@
 package types
 
 type DeviceDetail struct {
-	DeviceName     string
-	DevicePassword string
-	ClientAdded    bool
-	Online         bool
+	UserID          string
+	DeviceName      string
+	DevicePassword  string
+	ClientAdded     bool
+	Online          bool
+	ScheduledAction bool
+	Command         string
+	Timer           string
+	OnlineSince     uint
 }

@@ -10,7 +10,6 @@ var LiveWebSocketConnectionsMap = make(map[string] *types.WebSocketConnection)
 // type WebSocketConnection struct {
 // 	Conn  *websocket.Conn
 // 	DeviceID string
-// 	UserID string
 // 	ReadChan chan Message
 // 	WriteChan chan Message
 // 	ErrChan chan error

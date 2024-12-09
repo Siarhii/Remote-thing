@@ -18,12 +18,11 @@ type WebSocketConnection struct {
 }
 
 
-func NewWebSocketConnection(conn *websocket.Conn,deviceID string,userID string) *WebSocketConnection {
+func NewWebSocketConnection(conn *websocket.Conn,deviceID string,deviceName string) *WebSocketConnection {
 	return &WebSocketConnection{
 		Conn : conn,
 		DeviceID: deviceID,
-		UserID: userID,
-		DeviceName : "Not Avail for now",
+		DeviceName : deviceName,
 		CommandResponseChan: make(chan Message,1),
 		StatsResponseChan: make(chan Message,2),
 		WriteChan: make(chan Message,5),

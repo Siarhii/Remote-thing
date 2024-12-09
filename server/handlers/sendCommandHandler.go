@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"net/http"
 	globalvariables "server/globalVariables" //my file name and packname is exact same so its importing wth an alias? import numpy as np like thing
+	"server/helpers"
 	"server/types"
 	"time"
 )
 
 type CommandRequest struct {
 	DeviceID string `json:"deviceId"`
+	Command string `json:"Command"`
+	Timer string `json:"scheduleTime"`
+	Password string `json:"password"`
 }
 
 func SendCommandHandlerr(w http.ResponseWriter, r *http.Request) {
@@ -27,27 +31,47 @@ func SendCommandHandlerr(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if request.DeviceID == "" {
-		http.Error(w, "Missing deviceId", http.StatusBadRequest)
+	if request.DeviceID == "" || request.Command == "" {
+		fmt.Printf("Device id : %v and device command : %v",request.DeviceID,request.Command)
+		http.Error(w, "Missing deviceId or command", http.StatusBadRequest)
 		return
 	}
 
 	DeviceID := request.DeviceID
+	if !helpers.CheckIfDeviceRegistered(DeviceID){
+		http.Error(w, fmt.Sprintf("Device with ID %s is not registered", DeviceID), http.StatusNotFound)
+		return
+	}
 
 	wsn, exists := globalvariables.LiveWebSocketConnectionsMap[DeviceID]
 	if !exists {
-		http.Error(w, fmt.Sprintf("Device with ID %s not found", DeviceID), http.StatusNotFound)
+		http.Error(w, fmt.Sprintf("Device with ID %s is Offline", DeviceID), http.StatusNotFound) //offline as in not have active socket connection with server
+		return
+	}
+
+	if request.Command != "Shutdown" && request.Command != "Sleep" && request.Command != "Restart"{
+		http.Error(w,  fmt.Sprintf("Invalid Command : %v", request.Command), http.StatusBadRequest)
+		return
+	}
+
+	if !helpers.VerifyTimer(request.Timer){
+		http.Error(w,  fmt.Sprintf("Invalid timer : %v", request.Timer), http.StatusBadRequest)
+		return
+	}
+
+	if !helpers.VerifyDevicePassword(DeviceID, request.Password) {
+		fmt.Printf("Here3 : %v\n",request.Timer)
+		fmt.Printf("Here4 : %v\n",request.Password)
+		http.Error(w, "Device Password is not correct", http.StatusUnauthorized)
 		return
 	}
 
 	msg := types.Message{
 		Event:   "Command",
-		Content: "Meowmeow", 
+		Content: request.Command + "_" + request.Timer, 
 	}
 
-	fmt.Printf("LETSSOOGOGO : %v \n",DeviceID)
 	wsn.WriteChan <- msg
-	fmt.Printf("fassssssssssssssst : %v\n",DeviceID)
 
 	select {
 	case resMsg := <-wsn.CommandResponseChan:

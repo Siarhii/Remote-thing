@@ -6,33 +6,25 @@ const DeviceConnect = () => {
   const [deviceCode, setDeviceCode] = useState("");
   const [connectionStatus, setConnectionStatus] = useState(null);
 
-  const handleConnect = async () => {
-    const mockConnectDevice = async (deviceCode) => {
-      return new Promise((resolve, reject) => {
-        // Call the Go function with the deviceCode and a callback
-        ConnectToServer(deviceCode, (result) => {
-          if (result.includes("Successfully connected")) {
-            resolve(result); // Resolve promise with success message
-          } else {
-            reject(result); // Reject promise with error message
-          }
-        });
-      });
-    };
-
+  const handleConnect = async (dc) => {
     try {
-      const successMessage = await mockConnectDevice("some-device-id");
-      console.log("Connection Successful: ", successMessage);
-      setConnectionStatus("success"); // Update UI to show success
+      const result = await ConnectToServer(dc);
+
+      if (result.includes("Successfully connected")) {
+        console.log("Connection Successful: ", result);
+        setConnectionStatus("success");
+      } else {
+        console.error("Error connecting device:", result);
+        setConnectionStatus("failure");
+      }
     } catch (error) {
-      console.error("Error connecting device:", error);
-      setConnectionStatus("failure"); // Update UI to show failure
+      console.error("Unexpected error:", error);
+      setConnectionStatus("failure");
     }
   };
-
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
-      handleConnect();
+      handleConnect(deviceCode);
     }
   };
 
@@ -51,7 +43,12 @@ const DeviceConnect = () => {
             placeholder="Enter device code"
             className="device-code"
           />
-          <button onClick={handleConnect} className="connect-button">
+          <button
+            onClick={() => {
+              handleConnect(deviceCode);
+            }}
+            className="connect-button"
+          >
             Connect
           </button>
         </div>
