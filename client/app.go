@@ -198,7 +198,7 @@ func (c *ClientConnection) messageRouter() {
 				log.Printf("Received Command: %s", msg.Content)
 				
 				// Parse the Command message (assuming format: "action:timer")
-				parts := strings.Split(msg.Content, ":")
+				parts := strings.Split(msg.Content, "_")
 				if len(parts) != 2 {
 					log.Println("Invalid command format")
 					continue
