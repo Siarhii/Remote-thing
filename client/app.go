@@ -153,13 +153,12 @@ func (c *ClientConnection) processSystemAction(action string, timer string) erro
 	}
 
 	responseMsg := Message{
-		Event:   "SystemActionResponse",
+		Event:   "CommandResponse",
 		Content: responseContent,
 	}
 	return c.sendMessage(responseMsg)
 }
 
-// messageRouter reads all incoming messages and routes them to appropriate handlers
 func (c *ClientConnection) messageRouter() {
 	for {
 		select {
@@ -197,7 +196,6 @@ func (c *ClientConnection) messageRouter() {
 			case "Command":
 				log.Printf("Received Command: %s", msg.Content)
 				
-				// Parse the Command message (assuming format: "action:timer")
 				parts := strings.Split(msg.Content, "_")
 				if len(parts) != 2 {
 					log.Println("Invalid command format")
@@ -258,7 +256,6 @@ func (a *App) ActionFromClient(action string,timer string) error {
 }
 
 func (app *App) ConnectToServer(deviceID string) string {
-    // Create a channel to capture the result
     resultChan := make(chan string, 1)
 
     go func() {
@@ -286,17 +283,14 @@ func (app *App) ConnectToServer(deviceID string) string {
             done:     make(chan struct{}),
             app:      app,
         }
-
-        // Send success message 
+       
         resultChan <- fmt.Sprintf("Successfully connected to WebSocket with deviceID: %s", deviceID)
 
-        // Handle incoming messages
         go clientConn.messageRouter()
 
         // Wait for connection to be closed
         <-clientConn.done
     }()
 
-    // Wait and return the result
     return <-resultChan
 }

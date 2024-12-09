@@ -32,7 +32,7 @@ const performDeviceCommand = async (
     return result;
   } catch (error) {
     console.error("API call failed:", error);
-    throw error; // Re-throw the error to be caught by the calling function
+    throw error;
   }
 };
 
@@ -50,7 +50,7 @@ const DevicesPage = () => {
       }
 
       const data = await response.json();
-      setDevices(data);
+      setDevices(data || []);
       setIsLoading(false);
     } catch (err) {
       setError("Failed to fetch devices");
@@ -64,6 +64,16 @@ const DevicesPage = () => {
 
   if (isLoading) return <div className="text-white">Loading devices...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
+
+  //when no devices
+  if (!devices || devices.length === 0) {
+    return (
+      <div className="text-center text-white">
+        <h1 className="text-2xl font-bold mb-4">Your Devices</h1>
+        <p>No devices found. Add a device to get started.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -93,15 +103,24 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
   const [scheduleTime, setScheduleTime] = useState("00:00");
   const [password, setPassword] = useState("");
   const [CommandError, setCommandError] = useState(null);
+  const [CommandSuccess, setCommandSuccess] = useState(null);
+
+  const openPasswordModal = (Command) => {
+    setSelectedCommand(Command);
+    setPasswordModal(true);
+    setScheduleTime("00:00");
+    setPassword("");
+    setCommandError(null);
+  };
 
   const handleDeviceCommand = async () => {
     try {
       setCommandError(null);
+      setCommandSuccess(null);
 
-      // Convert scheduleTime (hh:mm) to total minutes
       const convertToMinutes = (time) => {
-        if (time === "00:00") return 0; // No scheduling
-        const [hours, minutes] = time.split(":").map(Number); // Split and convert to numbers
+        if (time === "00:00") return 0; //instant shutoff
+        const [hours, minutes] = time.split(":").map(Number);
         return `${hours * 60 + minutes}`;
       };
 
@@ -114,7 +133,8 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
         scheduleTimeInMinutes
       );
 
-      if (result.success) {
+      console.warn(`result is : ${result}`);
+      if (result.status === "success") {
         const updatedDevice = {
           ...device,
           scheduledCommand:
@@ -131,8 +151,14 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
         };
 
         onDeviceUpdate(updatedDevice);
+        setCommandSuccess(
+          result.message || `${selectedCommand} Command Sent Successfully`
+        );
         setPasswordModal(false);
-        alert(result.message || `${selectedCommand} successful`);
+
+        setTimeout(() => {
+          setCommandSuccess(null);
+        }, 3000);
       } else {
         setCommandError(result.message || "Command failed");
       }
@@ -147,16 +173,11 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
     }
   };
 
-  const openPasswordModal = (Command) => {
-    setSelectedCommand(Command);
-    setPasswordModal(true);
-    setScheduleTime("00:00");
-    setPassword("");
-    setCommandError(null);
-  };
-
   const cancelScheduledCommand = async () => {
     try {
+      setCommandError(null);
+      setCommandSuccess(null);
+
       const result = await performDeviceCommand(device.id, "cancel", password);
 
       if (result.success) {
@@ -166,8 +187,12 @@ const DeviceCard = ({ device, onDeviceUpdate }) => {
         };
 
         onDeviceUpdate(updatedDevice);
+        setCommandSuccess("Scheduled Command Cancelled");
         setPasswordModal(false);
-        alert("Scheduled Command cancelled");
+
+        setTimeout(() => {
+          setCommandSuccess(null);
+        }, 3000);
       } else {
         setCommandError(result.message || "Failed to cancel Command");
       }

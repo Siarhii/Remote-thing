@@ -76,7 +76,7 @@ func SendCommandHandlerr(w http.ResponseWriter, r *http.Request) {
 	select {
 	case resMsg := <-wsn.CommandResponseChan:
 		fmt.Printf("Response from client for Command is: %v\n", resMsg)
-	case <-time.After(10 * time.Second):
+	case <-time.After(4 * time.Second):
 		http.Error(w, "Timeout waiting for response from device", http.StatusRequestTimeout)
 		return
 	}
