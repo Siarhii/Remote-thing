@@ -83,7 +83,7 @@ wails build
 
 # Run the application
 ./Remote-shutdown.exe
-
+```
 
 💡 Usage
 Offline Mode:
@@ -109,4 +109,3 @@ Feel free to check the issues page.
 
 🌟 Show Your Support
 If you like this project, give it a ⭐️ and share it with others!
-```
