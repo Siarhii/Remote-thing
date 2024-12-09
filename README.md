@@ -65,7 +65,7 @@ A remote shutdown and monitoring application that allows users to schedule **shu
 
 ### Option 1: Precompiled Binary
 
-Download the executable: **[remote-shutdown.exe](#)**
+Download the executable: **[remote-shutdown.exe](./remote-shutdown.exe)**
 
 ### Option 2: Build From Source
 
