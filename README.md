@@ -116,17 +116,6 @@ wails build
 
 ---
 
-# 🚀 Remote Shutdown App
-
-![GitHub stars](https://img.shields.io/github/stars/Siarhii/Remote-thing?style=social)  
-![License](https://img.shields.io/github/license/Siarhii/Remote-thing)  
-![GitHub issues](https://img.shields.io/github/issues/Siarhii/Remote-thing)  
-![GitHub last commit](https://img.shields.io/github/last-commit/Siarhii/Remote-thing)
-
-A comprehensive remote shutdown and monitoring application that allows users to schedule **shutdown, sleep, and restart commands** for their homelabs. The app supports **offline and online modes** with device management capabilities.
-
----
-
 ## How This Works
 
 ### Behind the Scenes
