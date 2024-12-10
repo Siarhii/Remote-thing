@@ -116,6 +116,68 @@ wails build
 
 ---
 
+# 🚀 Remote Shutdown App
+
+![GitHub stars](https://img.shields.io/github/stars/Siarhii/Remote-thing?style=social)  
+![License](https://img.shields.io/github/license/Siarhii/Remote-thing)  
+![GitHub issues](https://img.shields.io/github/issues/Siarhii/Remote-thing)  
+![GitHub last commit](https://img.shields.io/github/last-commit/Siarhii/Remote-thing)
+
+A comprehensive remote shutdown and monitoring application that allows users to schedule **shutdown, sleep, and restart commands** for their homelabs. The app supports **offline and online modes** with device management capabilities.
+
+---
+
+## How This Works
+
+### Behind the Scenes
+
+So, you're wondering how this app came to life? Let me break it down for you:
+
+- **Desktop App**: Built with Go and Wails
+- **Backend**: Pure Go with socket magic
+- **Web Interface**: React
+
+### The Online Mode Adventure
+
+Here's how you can use it:
+
+1. **Device Registration**
+   Hop into the web app's "Add Devices" tab.
+
+   - Create a password
+   - The backend will hand you a unique connection code
+
+2. **Connecting the Dots**
+
+   - Open your desktop app
+   - Paste that magic code you just got
+   - Boom! Instant connection between your device and the backend
+
+3. **Remote Control Time**
+   - Want to shut down a computer from across the room (or the world)?
+   - Jump into the web app
+   - Enter your device's password
+   - Execute commands like a tech wizard
+
+### Why I Built This
+
+Real talk - I created this app to solve a few headaches:
+
+- **No More Network Nightmares**: Forget about port forwarding or firewalls
+- **Simplicity is King**: Remote control should be EASY,you dont need to do anything,just install the exe and youre done
+- **Learning Go**: Because why not challenge myself and build something cool?
+
+### 🔐 Current Security Approach
+
+It's not Fort Knox yet, but i'm working on it:
+
+- Device-specific passwords
+- Unique connection codes
+
+**NOTE**: This is a temperory solution which will be changed when full authentication is implemented
+
+---
+
 ### 👥 Contributors
 
 - **[Siarhii](https://github.com/Siarhii)** - Developer
