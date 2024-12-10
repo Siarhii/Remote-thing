@@ -5,7 +5,7 @@
 ![GitHub issues](https://img.shields.io/github/issues/Siarhii/Remote-thing)  
 ![GitHub last commit](https://img.shields.io/github/last-commit/Siarhii/Remote-thing)
 
-A comprehensive remote shutdown and monitoring application that allows users to schedule **shutdown, sleep, and restart commands** for their homelabs. The app now supports **fully functional offline and online modes** with advanced device management capabilities.
+A comprehensive remote shutdown and monitoring application that allows users to schedule **shutdown, sleep, and restart commands** for their homelabs. The app supports **offline and online modes** with device management capabilities.
 
 ---
 
@@ -18,20 +18,19 @@ A comprehensive remote shutdown and monitoring application that allows users to 
 - **Flexible Task Planning**:  
   Easily plan and manage system tasks with intuitive controls.
 
-### 🌐 Online Tab (Now Fully Operational)
+### 🌐 Online Tab (Developing)
 
-- **Seamless User Authentication**:  
-  Secure login functionality for managing multiple connected devices.
-- **Advanced Device Management**:
-  - Add and manage devices with unique identification
-  - Real-time device status monitoring
-  - Instant remote command execution
+- **Device Password Protection**:  
+  Secure device addition with password-based access
+- **Device Management**:
+  - Add devices with unique identifiers
+  - Monitor device status
+  - Execute remote commands
 
-### 🔒 Security Features
+### 🔒 Current Security Approach
 
-- Secure communication protocols for backend and frontend interactions
+- Password protection for device addition
 - Unique code generation for device pairing
-- Robust authentication mechanisms
 
 ### 🛡️ Background Mode
 
@@ -46,13 +45,13 @@ A comprehensive remote shutdown and monitoring application that allows users to 
 
 ![Offline Tab Screenshot](SS/offline.png)
 
-### 🌐 Online Tab (New!)
+### 🌐 Online Tab
 
 ![Online Tab Screenshot](SS/online.png)
 
 ### 📊 Web App Screenshots
 
-- **Dashboard**  
+- **Add Device**  
   ![add Device page](SS/addDevice.png)
 
 - **Device Management**  
@@ -95,10 +94,10 @@ wails build
 
 #### Online Mode
 
-1. Log into your account
-2. Add devices using unique generated codes
-3. Manage and execute remote commands with ease
-4. Monitor device status in real-time
+1. Add devices using unique generated codes
+2. Set device-specific passwords
+3. Manage and execute remote commands
+4. Monitor device status
 
 ---
 
@@ -106,11 +105,12 @@ wails build
 
 - ✅ Working offline tab
 - ✅ Polished frontend UI for offline and online tabs
-- ✅ Unique code generator for client apps
-- ✅ Authentication and remote command scheduling
-- ✅ Online device management
-- ⬜ Enhance local app storage
-- ⬜ Improve auto socket reconnection
+- ✅ Unique code generator for device addition
+- ✅ Device password protection
+- ✅ Basic online device management
+- ⬜ Full user authentication system
+- ⬜ User profile management
+- ⬜ Advanced security features
 - ⬜ Add advanced monitoring stats (CPU, RAM, temperature)
 - ⬜ Implement custom command scheduling for specific use cases
 
@@ -141,6 +141,6 @@ If you like this project, **give it a ⭐️** and share it with others!
 
 **Recent Updates:**
 
-- Online mode is now fully functional
-- Added comprehensive device management
-- Improved authentication and remote command execution
+- Online mode device management implemented
+- Password protection for device addition
+- Improved remote command execution
